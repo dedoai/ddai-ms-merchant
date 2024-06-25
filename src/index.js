@@ -1,5 +1,5 @@
-
-const { RPC_URL, SERVER_PORT, COLD_WALLET_ADDRESS, HOT_WALLET_MNEMONIC, DB_CHILD_ID_KEYNAME } = require('./config')
+const assert = require('assert')
+const { RPC_URL, SERVER_PORT, COLD_WALLET_ADDRESS, HOT_WALLET_MNEMONIC, FAUCET_AIRDROP_AMOUNT, DB_CHILD_ID_KEYNAME } = require('./config')
 const { initDb, db } = require('./db')
 const Wallet = require('./Wallet')
 const Server = require('./Server')
@@ -13,7 +13,13 @@ global.fetch = require('node-fetch')
 
   // instantiate wallet
   const wallet = new Wallet(HOT_WALLET_MNEMONIC)
-  console.log(`How wallet initialized:`, !!wallet)
+  const HOT_WALLET_ADDRESS = await wallet.getHotWalletAddress()
+  console.log('Hot wallet initialized, address:', HOT_WALLET_ADDRESS)
+  const hotWalletBalance = await wallet.getBalance(HOT_WALLET_ADDRESS)
+  console.log('Hot wallet balance:', hotWalletBalance)
+  console.log(FAUCET_AIRDROP_AMOUNT)
+  assert(hotWalletBalance > FAUCET_AIRDROP_AMOUNT, 'Please top-up hot wallet balance!')
+  
   console.log(`Cold wallet address: ${COLD_WALLET_ADDRESS}`)
 
   // configure & start DB

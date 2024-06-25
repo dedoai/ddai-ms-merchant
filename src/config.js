@@ -7,6 +7,7 @@ module.exports = {
   HOT_WALLET_MNEMONIC: 'prosper tomorrow coil run youth rural pet perfect tornado trend gate cave',
   COLD_WALLET_ADDRESS: '0xE9Cf4e6c8337096Ca76Ece24702aD1EB98639846',
   DEDO_CONTRACT_ADDRESS: '0xbEbd4D5174B1faD2a456863a226d02EcB279102a', // ERC20 Contract address (on Sepolia)
+  FAUCET_AIRDROP_AMOUNT: BigInt(0.01 * 1e18), // (0.01 ETH), amount sent to the child addresses to pay fees to transfer ERC20
   // server config
   SERVER_PORT: process.env.PORT || 8080,
   RPC_URL: 'https://ethereum-sepolia-rpc.publicnode.com', // Sepolia node RPC url.. to get balance and broadcast tx
