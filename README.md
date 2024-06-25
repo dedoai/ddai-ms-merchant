@@ -21,12 +21,18 @@ Amounts are always represented in the smallest DEDO unit: `1000000000000000000 a
 ### Requirements
 
 - MongoDB running on `mongodb://localhost:27017`
-- Sepolia (testnet) RPC server, by default using `...`
+- Sepolia (testnet) RPC server, by default using `https://ethereum-sepolia-rpc.publicnode.com`
 - The Web Server runs on the provided env PORT or `8080` by default
 
 ### Config
 
 Check the *config.js* file. By default the Cron Job interval is 60 seconds.
+
+### Start
+
+1. Install dependencies `yarn install`
+2. Make sure the Mongo DB is running (see docker command section below)
+3. Run `yarn start`
 
 ### Server API
 
@@ -76,9 +82,9 @@ JSON Result:
 
 Running a MongoDB container:
 
-`docker run -d -p 127.0.0.1:27017:27017 --name mongodb -v $HOME/mongo_db_data:/data/db mongo:latest`
+`docker run -d -p 127.0.0.1:27017:27017 --name mongodb -v $HOME/mongo_merchant_db_data:/data/db mongo:latest`
 
-Data will be persistent, stored in the server `/home/<user>/mondo_db_data` directory. The MongoDB server will have no auth, but bind to 127.0.0.1 so it won't be accessible from a remote client.
+Data will be persistent, stored in the server `/home/<user>/mongo_merchant_db_data` directory. The MongoDB server will have no auth, but bind to 127.0.0.1 so it won't be accessible from a remote client.
 
 If for any reason the DB must be accessed remotely (for example by a MongoDB client), you can install and use the `socat` tool: `socat TCP-LISTEN:27017,fork,bind=104.131.162.155 TCP:localhost:27017` that will redirect public iface traffic on port 27017 to localhost:27017 (MongoDB running).
 
