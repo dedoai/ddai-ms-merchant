@@ -13,6 +13,15 @@ class Wallet {
     this.contract = new ethers.Contract(DEDO_CONTRACT_ADDRESS, GENERIC_ERC20_ABI, this.provider)
   }
 
+  async getHotWalletAddress() {
+    // main wallet, used as hot wallet and faucet to send ETH to top-up child wallets (to pay fees for ERC20 transfer)
+    return this.ethersWallet.getAddress()
+  }
+
+  getHotWalletPrivateKey() {
+    return this.ethersWallet.privateKey
+  }
+
   getWalletFromMnemonic(mnemonic) {
     return ethers.Wallet.fromPhrase(mnemonic || HOT_WALLET_MNEMONIC)
   }
@@ -66,6 +75,7 @@ class Wallet {
       to: to || COLD_WALLET_ADDRESS,
       value: amount, // in DEDO unit (BigInt)
       gasPrice,
+      gasLimit: BigInt(21000) // fixed
     })
     return tx
   }
@@ -91,6 +101,10 @@ class Wallet {
     return gasPrice * gasLimit
   }
 
+  async waitForConfirmation(txId) {
+    return this.provider.waitForTransaction(txId, MIN_CONFIRMATIONS, CONFIRMATION_TIMEOUT)
+  }
+
   async transferAllToColdWallet({ privateKey }) {
     // transfer all the token balance to the cold wallet address + remaining ETH left from fees
     assert.ok(privateKey, 'privateKey is mandatory')
@@ -101,7 +115,7 @@ class Wallet {
     let erc20Tx = null
     if (erc20Balance) erc20Tx = await this.sendErc20Transaction({ privateKey, to: COLD_WALLET_ADDRESS, amount: erc20Balance })
     // wait for confirmation.
-    if (erc20Tx) await this.provider.waitForTransaction(erc20Tx.hash, MIN_CONFIRMATIONS, CONFIRMATION_TIMEOUT)
+    if (erc20Tx) await this.waitForConfirmation(erc20Tx.hash)
     const ethBalance = await this.getBalance(address)
     const gasPrice = await this.getGasPrice()
     const amount = ethBalance - this.getFee({ gasPrice }) // ETH
