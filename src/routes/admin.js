@@ -25,7 +25,7 @@ router.route('/clear-order').post(async (req, res, next) => {
     // check balance
     const address = wallet.getAddressFromChildIndex(Number(orderId))
     wallet.throwOnInvalidAddress(address)
-    const balance = await wallet.getBalance(address)
+    const balance = await wallet.getErc20Balance(address)
     assert.ok(balance, 'Address has no balance')
 
     // move funds
