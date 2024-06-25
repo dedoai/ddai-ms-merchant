@@ -1,4 +1,4 @@
-const { RPC_URL, CHECK_INTERVAL } = require('./config')
+const { RPC_URL, CHECK_INTERVAL, FAUCET_AIRDROP_AMOUNT } = require('./config')
 
 class CronJob {
   constructor({ wallet, db }) {
@@ -8,12 +8,23 @@ class CronJob {
 
   async start() {
     this.timer = setInterval(async () => {
-      await this.checkOrders()
+      const hasBalance = await this.checkHotWalletBalance()
+      if (hasBalance) await this.checkOrders()
     }, CHECK_INTERVAL)
   }
 
   async stop() {
     clearInterval(this.timer)
+  }
+
+  async checkHotWalletBalance() {
+    const HOT_WALLET_ADDRESS = await this.wallet.getHotWalletAddress()
+    const hotWalletBalance = await this.wallet.getBalance(HOT_WALLET_ADDRESS)
+    if (hotWalletBalance <= FAUCET_AIRDROP_AMOUNT) {
+      console.error('!!! TOP-UP HOT-WALLET BALANCE !!!\nHot wallet has not enough ETH')
+      return false
+    }
+    return true
   }
 
   async checkOrders() {
@@ -26,8 +37,8 @@ class CronJob {
   async checkWaitingOrders() {
     /*
      1. get array of all the waiting orders (that are not expired): this.db.getWaitingOrders
-     2. query the chain for all the orders, check if the deposit address has the expected balance
-     3. if it does, send the amount to the COLD_WALLET_ADDRESS, otherwise skip
+     2. query the chain for all the orders, check if the deposit address has the expected ERC20 balance
+     3. if it does, send the ETH Airdrop and have all the balances forwarded to the COLD_WALLET_ADDRESS, otherwise skip
         if the amount is under/above the expected, mark as "overpaid/underpaid".
      4. update the document: this.db.addOrUpdateOrder({ ..., status: 'successful' })
      */
@@ -42,6 +53,7 @@ class CronJob {
          const balance = await this.wallet.getErc20Balance(address)
          if (balance === BigInt(order.amount) && order.status === 'waiting') {
            // order paid!
+           await this.sendEthForFees(address)
            await this.transferOrderFundsToColdWallet(order.childId)
            // update db: successful
            await this.updateOrderStatus({ order, status: 'successful', received: String(balance) })
@@ -74,6 +86,18 @@ class CronJob {
        console.log('cron:checkOrders() expired error:', err)
      }
    }))
+  }
+
+  async sendEthForFees (address) {
+    // check if address has ETH funds already
+    const balance = await this.wallet.getBalance(address)
+    if (balance >= FAUCET_AIRDROP_AMOUNT) return // it has enough ETH
+    // send ETH to the address so we will be able to pay fees to transfer ERC20
+    const privateKey = this.wallet.getHotWalletPrivateKey()
+    const gasPrice = await this.wallet.getGasPrice()
+    const tx = await this.wallet.sendTransaction({ privateKey, to: address, gasPrice, amount: FAUCET_AIRDROP_AMOUNT })
+    console.log('cron: airdrop sent', tx.hash)
+    return this.wallet.waitForConfirmation(tx.hash)
   }
 
   async transferOrderFundsToColdWallet (orderId) {
