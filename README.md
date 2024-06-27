@@ -18,6 +18,8 @@ API to create payment orders, for the **DEDO** ERC20 (evm blockchain).
 
 Amounts are always represented in the smallest DEDO unit: `1000000000000000000 adedo = 1 DEDO`.
 
+Note that the Hot Wallet is used as Faucet to send ETH (to deposit addresses, to pay fees to move DEDO) and to send DEDO (to custom addresses using the `admin/faucet` route).
+
 ### Requirements
 
 - MongoDB running on `mongodb://localhost:27017`
@@ -33,6 +35,18 @@ Check the *config.js* file. By default the Cron Job interval is 60 seconds.
 1. Install dependencies `yarn install`
 2. Make sure the Mongo DB is running (see docker command section below)
 3. Run `yarn start`
+
+## MongoDB database
+
+Running a MongoDB container:
+
+`docker run -d -p 127.0.0.1:27017:27017 --name mongodb -v $HOME/mongo_merchant_db_data:/data/db mongo:latest`
+
+Data will be persistent, stored in the server `/home/<user>/mongo_merchant_db_data` directory. The MongoDB server will have no auth, but bind to 127.0.0.1 so it won't be accessible from a remote client.
+
+If for any reason the DB must be accessed remotely (for example by a MongoDB client), you can install and use the `socat` tool: `socat TCP-LISTEN:27017,fork,bind=104.131.162.155 TCP:localhost:27017` that will redirect public iface traffic on port 27017 to localhost:27017 (MongoDB running).
+
+You can make sure the container is running executing `docker ps`. Or check the container logs with `docker logs -f <container_id>`
 
 ### Server API
 
@@ -78,15 +92,30 @@ JSON Result:
 }
 ```
 
-## MongoDB database
+Clear a stuck order:
 
-Running a MongoDB container:
+```
+POST - /admin/clear-order
 
-`docker run -d -p 127.0.0.1:27017:27017 --name mongodb -v $HOME/mongo_merchant_db_data:/data/db mongo:latest`
+JSON Request:
 
-Data will be persistent, stored in the server `/home/<user>/mongo_merchant_db_data` directory. The MongoDB server will have no auth, but bind to 127.0.0.1 so it won't be accessible from a remote client.
+{
+  orderId,
+  password,
+  newStatus
+}
+```
 
-If for any reason the DB must be accessed remotely (for example by a MongoDB client), you can install and use the `socat` tool: `socat TCP-LISTEN:27017,fork,bind=104.131.162.155 TCP:localhost:27017` that will redirect public iface traffic on port 27017 to localhost:27017 (MongoDB running).
+Send DEDO tokens using the Hot Wallet (it only sends ERC20):
 
-You can make sure the container is running executing `docker ps`. Or check the container logs with `docker logs -f <container_id>`
+```
+POST - /admin/faucet
 
+JSON Request:
+
+{
+  address,
+  amount,
+  password,
+}
+```
