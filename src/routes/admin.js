@@ -47,4 +47,39 @@ router.route('/clear-order').post(async (req, res, next) => {
   }
 })
 
+// POST - /admin/faucet
+router.route('/faucet').post(async (req, res, next) => {
+  try {
+    console.log('got /faucet request:', { body: req.body })
+
+    const { wallet } = req
+    const { address, amount, password } = req.body
+
+    assert.ok(typeof address === 'string', 'Expected string: address')
+    wallet.throwOnInvalidAddress(address)
+    assert.ok(typeof amount === 'string', 'Expected string: amount')
+    assert.ok(typeof password === 'string', 'Missing password')
+    assert.ok(password === MOVE_FUNDS_PASS, 'Wrong password')
+
+    // check Hot Wallet ERC20 balance
+    const hotWalletAddress = await wallet.getHotWalletAddress()
+    const balance = await wallet.getErc20Balance(hotWalletAddress)
+    assert.ok(balance, 'Hot Wallet has not enough ERC20 balance')
+    if (balance < BigInt(amount)) throw new Error(`Hot Wallet balance is ${balance}, which is lower than ${amount}`)
+
+    // send funds
+    const privateKey = wallet.getHotWalletPrivateKey()
+    const tx = await wallet.sendErc20Transaction({ privateKey, to: address, amount })
+    console.log('faucet - sent funds:', tx)
+
+    if (tx.hash) {
+      // return obj...
+      res.status(200).json({ status: 'success', txId: tx.hash, message: 'amount sent' })
+    } else res.status(200).json({ status: 'error', error: 'Error Sending funds - check logs' })
+    res.end()
+  } catch (err) {
+    next(err)
+  }
+})
+
 module.exports = router
