@@ -1,0 +1,35 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      # Install dependencies needed for running tests
+      - aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin 740655432443.dkr.ecr.eu-west-2.amazonaws.com
+      - REL=$(cat release_version.txt)
+      - cd app
+      - npm install -g
+      - cd ..
+      # Upgrade AWS CLI to the latest version
+#      - pip install --upgrade awscli
+  pre_build:
+    commands:
+      # Discover and run unit tests in the 'tests' directory
+#      - npm test
+  build:
+    commands:
+     - cp infrastructure/builder/Dockerfile .
+     - d=$(date +"%Y%m%d%H%M%S")
+     - docker build . -t ddaiMerchantApi:${REL}-prepare
+  post_build:
+    commands:
+     - IMAGE_URI=740655432443.dkr.ecr.eu-west-2.amazonaws.com/ddaiMerchantApi:${REL}
+     - docker tag ddaiMerchantApi:${REL}-prepare $IMAGE_URI
+     - docker push $IMAGE_URI
+     - pwd
+     - ls -l
+     - cp infrastructure/deploy/deploy.sh .
+     - ./deploy.sh
+
+artifacts:
+  files:
+    - '**/*'

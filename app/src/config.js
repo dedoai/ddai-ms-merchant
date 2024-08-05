@@ -9,7 +9,7 @@ module.exports = {
   DEDO_CONTRACT_ADDRESS: '0xbEbd4D5174B1faD2a456863a226d02EcB279102a', // ERC20 Contract address (on Sepolia)
   FAUCET_AIRDROP_AMOUNT: BigInt(0.01 * 1e18), // (0.01 ETH), amount sent to the child addresses to pay fees to transfer ERC20
   // server config
-  SERVER_PORT: process.env.PORT || 8080,
+  SERVER_PORT: process.env.PORT || 8081,
   RPC_URL: 'https://ethereum-sepolia-rpc.publicnode.com', // Sepolia node RPC url.. to get balance and broadcast tx
   MOVE_FUNDS_PASS: 's3cr3t', // used to force moving stuck orders funds
   // mongodb database
