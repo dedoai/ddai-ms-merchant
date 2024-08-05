@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  EcrImageUri:
+    Description: ECR image URI of ddaiMerchantApi
+    Type: String
+Resources:
+  ddaiMerchantApiLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      PackageType: Image
+      FunctionName: ddaiMerchantApi
+      Role: !GetAtt ddaiMerchantApiLambdaRole.Arn
+      Code:
+        ImageUri: !Ref 'EcrImageUri'
+      Architectures:
+        - x86_64
+      MemorySize: 1024
+      Timeout: 2
+      VpcConfig:
+        SecurityGroupIds:
+        - sg-01509658389c9852b
+        - sg-0d3137bb13f16a2c8
+        - sg-04e4a776911acd493
+        - sg-0a3101b962a245688
+        SubnetIds:
+        - subnet-7c864215
+        - subnet-1b7e9360
+        - subnet-65d7d12f
+      Environment:
+        Variables:
+          BACKEND_API_URL: https://dedoaibackend/
+          REDIS_URL: redis://rediswriter:3672
+          REDIS_URL_READER: redis://redisreader:3672
+          SQS_QUEUE: waiting-room-dev
+  ddaiMerchantApiLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ddaiMerchantApi-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
