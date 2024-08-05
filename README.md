@@ -1,5 +1,5 @@
 
-# DEDO Merchant API
+# DDAI - Merchant API
 
 API to create payment orders, for the **DEDO** ERC20 (evm blockchain).
 
