@@ -1,121 +1,64 @@
+Welcome to the AWS CodeStar sample web application
+==================================================
 
-# DDAI - Merchant API
+This sample code helps get you started with a simple Node.js web service deployed by AWS CloudFormation to AWS Lambda and Amazon API Gateway.
 
-API to create payment orders, for the **DEDO** ERC20 (evm blockchain).
+What's Here
+-----------
 
-### Flow
+This sample includes:
 
-1. API to create an order
-  - We have a master seed/mnemonics-based hot wallet.
-  - We generate a deposit address using multiple derivation child IDs.
-  - We store the order reference, address, amount, and child ID in the database.
-2. (The deposit address is returned by the API and displayed to the user.)
-3. The user sends the payment.
-  - Need the system to handle underpaid or overpaid payments. This will require a manual or automatic refund to the sender's address. (Disclaimer: Do not pay using exchange withdrawal.)
-4. Create an API to show the order status: **waiting**, **successful** or **expired**. (Use the order ID.). Other status: **overpaid**, **underpaid**, **cleared**.
-5. Create a cron service that will check the on-chain balance for waiting orders and update the status.
-6. Create a service to forward DEDO to cold-wallet: Received and confirmed DEDO are automatically forwarded to the cold wallet. (This means that funds will only be held temporarily on the server hot wallet.)
+* README.md - this file
+* buildspec.yml - this file is used by AWS CodeBuild to package your
+  application for deployment to AWS Lambda
+* index.js - this file contains the sample Node.js code for the web service
+* template.yml - this file contains the AWS Serverless Application Model (AWS SAM) used
+  by AWS CloudFormation to deploy your application to AWS Lambda and Amazon API
+  Gateway.
+* tests/ - this directory contains unit tests for your application
+* template-configuration.json - this file contains the project ARN with placeholders used for tagging resources with the project ID
 
-Amounts are always represented in the smallest DEDO unit: `1000000000000000000 adedo = 1 DEDO`.
+What Do I Do Next?
+------------------
 
-Note that the Hot Wallet is used as Faucet to send ETH (to deposit addresses, to pay fees to move DEDO) and to send DEDO (to custom addresses using the `admin/faucet` route).
+If you have checked out a local copy of your repository you can start making
+changes to the sample code.  We suggest making a small change to index.js first,
+so you can see how changes pushed to your project's repository are automatically
+picked up by your project pipeline and deployed to AWS Lambda and Amazon API Gateway.
+(You can watch the pipeline progress on your AWS CodeStar project dashboard.)
+Once you've seen how that works, start developing your own code, and have fun!
 
-### Requirements
+To run your tests locally, go to the root directory of the
+sample code and run the `npm test` command, which
+AWS CodeBuild also runs through your `buildspec.yml` file.
 
-- MongoDB running on `mongodb://localhost:27017`
-- Sepolia (testnet) RPC server, by default using `https://ethereum-sepolia-rpc.publicnode.com`
-- The Web Server runs on the provided env PORT or `8080` by default
+To test your new code during the release process, modify the existing tests or
+add tests to the tests directory. AWS CodeBuild will run the tests during the
+build stage of your project pipeline. You can find the test results
+in the AWS CodeBuild console.
 
-### Config
+Learn more about AWS CodeBuild and how it builds and tests your application here:
+https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html
 
-Check the *config.js* file. By default the Cron Job interval is 60 seconds.
+Learn more about AWS Serverless Application Model (AWS SAM) and how it works here:
+https://github.com/awslabs/serverless-application-model/blob/master/HOWTO.md
 
-### Start
+AWS Lambda Developer Guide:
+https://docs.aws.amazon.com/lambda/latest/dg/deploying-lambda-apps.html
 
-1. Install dependencies `yarn install`
-2. Make sure the Mongo DB is running (see docker command section below)
-3. Run `yarn start`
+Learn more about AWS CodeStar by reading the user guide, and post questions and
+comments about AWS CodeStar on our forum.
 
-## MongoDB database
+User Guide: https://docs.aws.amazon.com/codestar/latest/userguide/welcome.html
 
-Running a MongoDB container:
+Forum: https://forums.aws.amazon.com/forum.jspa?forumID=248
 
-`docker run -d -p 127.0.0.1:27017:27017 --name mongodb -v $HOME/mongo_merchant_db_data:/data/db mongo:latest`
+What Should I Do Before Running My Project in Production?
+------------------
 
-Data will be persistent, stored in the server `/home/<user>/mongo_merchant_db_data` directory. The MongoDB server will have no auth, but bind to 127.0.0.1 so it won't be accessible from a remote client.
+AWS recommends you review the security best practices recommended by the framework
+author of your selected sample application before running it in production. You
+should also regularly review and apply any available patches or associated security
+advisories for dependencies used within your application.
 
-If for any reason the DB must be accessed remotely (for example by a MongoDB client), you can install and use the `socat` tool: `socat TCP-LISTEN:27017,fork,bind=104.131.162.155 TCP:localhost:27017` that will redirect public iface traffic on port 27017 to localhost:27017 (MongoDB running).
-
-You can make sure the container is running executing `docker ps`. Or check the container logs with `docker logs -f <container_id>`
-
-### Server API
-
-Create an order:
-
-```
-POST - /order/create
-
-Expected payload:
-
-{
-  amount: '1000000000000000000', // 1 DEDO order amount as string in adedo (smallest unit!)
-  customer: '123456', // a customer identifier (string)
-  item: 'xxxx', // an item identifier
-  note: '...', // additional notes
-}
-
-JSON Result:
-
-{ status: 'waiting', orderId: childId, address, amount, time }
-OR
-{ status: 'error', error: 'error msg...' }
-
-```
-
-Get order status:
-
-```
-GET - /order/get/<order-id>
-
-JSON Result:
-
-{
-  childId,
-  address,
-  amount,
-  received,
-  customer,
-  time,
-  status,
-  item,
-  note,
-}
-```
-
-Clear a stuck order:
-
-```
-POST - /admin/clear-order
-
-JSON Request:
-
-{
-  orderId,
-  password,
-  newStatus
-}
-```
-
-Send DEDO tokens using the Hot Wallet (it only sends ERC20):
-
-```
-POST - /admin/faucet
-
-JSON Request:
-
-{
-  address,
-  amount,
-  password,
-}
-```
+Best Practices: https://docs.aws.amazon.com/codestar/latest/userguide/best-practices.html?icmpid=docs_acs_rm_sec
