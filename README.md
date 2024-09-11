@@ -1,64 +1,142 @@
-Welcome to the AWS CodeStar sample web application
-==================================================
+k# ddai-ms-merchant
 
-This sample code helps get you started with a simple Node.js web service deployed by AWS CloudFormation to AWS Lambda and Amazon API Gateway.
+![Node.js](https://img.shields.io/badge/Node.js-14.x-green)
+![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-yellow)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-What's Here
------------
+**dedoAI** - Merchant Microservice for DEDO Token Transactions
 
-This sample includes:
+---
 
-* README.md - this file
-* buildspec.yml - this file is used by AWS CodeBuild to package your
-  application for deployment to AWS Lambda
-* index.js - this file contains the sample Node.js code for the web service
-* template.yml - this file contains the AWS Serverless Application Model (AWS SAM) used
-  by AWS CloudFormation to deploy your application to AWS Lambda and Amazon API
-  Gateway.
-* tests/ - this directory contains unit tests for your application
-* template-configuration.json - this file contains the project ARN with placeholders used for tagging resources with the project ID
+## Overview
 
-What Do I Do Next?
-------------------
+The `ddai-ms-merchant` service is a microservice responsible for managing economic transactions involving the **DEDO token**, supporting sales of datasets on the dedoAI platform and integrating with the proprietary Blockchain. It provides RESTful APIs to facilitate the creation, retrieval, update, and deletion of transactions.
 
-If you have checked out a local copy of your repository you can start making
-changes to the sample code.  We suggest making a small change to index.js first,
-so you can see how changes pushed to your project's repository are automatically
-picked up by your project pipeline and deployed to AWS Lambda and Amazon API Gateway.
-(You can watch the pipeline progress on your AWS CodeStar project dashboard.)
-Once you've seen how that works, start developing your own code, and have fun!
+---
 
-To run your tests locally, go to the root directory of the
-sample code and run the `npm test` command, which
-AWS CodeBuild also runs through your `buildspec.yml` file.
+## Features
 
-To test your new code during the release process, modify the existing tests or
-add tests to the tests directory. AWS CodeBuild will run the tests during the
-build stage of your project pipeline. You can find the test results
-in the AWS CodeBuild console.
+- **Transaction Management**: Full CRUD operations for handling DEDO token transactions related to dataset sales.
+- **File Management**: Supports uploading, retrieving, and deleting files associated with transactions.
+- **Blockchain Integration**: Connects to the proprietary dedoAI Blockchain for secure and transparent transactions.
+- **Dockerized**: Packaged as a Docker container for scalable deployment.
+- **AWS Lambda**: Uses serverless architecture for handling transaction operations.
 
-Learn more about AWS CodeBuild and how it builds and tests your application here:
-https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html
+---
 
-Learn more about AWS Serverless Application Model (AWS SAM) and how it works here:
-https://github.com/awslabs/serverless-application-model/blob/master/HOWTO.md
+## Technologies
 
-AWS Lambda Developer Guide:
-https://docs.aws.amazon.com/lambda/latest/dg/deploying-lambda-apps.html
+- **Node.js**: The core backend logic is implemented in Node.js.
+- **AWS Lambda**: Serverless platform used to manage transaction requests.
+- **Docker**: Containerized for scalable and seamless deployment.
+- **Proprietary Blockchain**: Integrates with the dedoAI Blockchain for managing DEDO token transactions.
 
-Learn more about AWS CodeStar by reading the user guide, and post questions and
-comments about AWS CodeStar on our forum.
+---
 
-User Guide: https://docs.aws.amazon.com/codestar/latest/userguide/welcome.html
+## API Endpoints
 
-Forum: https://forums.aws.amazon.com/forum.jspa?forumID=248
+The following APIs are exposed by the service:
 
-What Should I Do Before Running My Project in Production?
-------------------
+| Method | Endpoint                 | Description                                       |
+|--------|--------------------------|---------------------------------------------------|
+| GET    | `/merchant`               | Retrieve transaction details or associated files  |
+| POST   | `/merchant`               | Create a new transaction                          |
+| PUT    | `/merchant/{id}`          | Update an existing transaction                    |
+| DELETE | `/merchant/{id}`          | Delete a transaction                              |
 
-AWS recommends you review the security best practices recommended by the framework
-author of your selected sample application before running it in production. You
-should also regularly review and apply any available patches or associated security
-advisories for dependencies used within your application.
+### Example Request
 
-Best Practices: https://docs.aws.amazon.com/codestar/latest/userguide/best-practices.html?icmpid=docs_acs_rm_sec
+```bash
+curl -X POST "https://your-api-endpoint/merchant" \
+-H "Content-Type: application/json" \
+-d '{"title": "Dataset Transaction", "amount": 100, "token": "DEDO"}'
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+To run or contribute to this project, you will need:
+
+- **Node.js** (version 14.x or higher)
+- **AWS CLI**: To interact with AWS services.
+- **Docker**: Required for running and packaging the Lambda function.
+
+### Setup Instructions
+
+1. Clone the repository:
+
+    ```bash
+    git clone https://github.com/dedoAI/ddai-ms-merchant.git
+    cd ddai-ms-merchant
+    ```
+
+2. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+3. Build and run the Docker container:
+
+    ```bash
+    docker build -t ddai-ms-merchant .
+    docker run -p 3000:3000 ddai-ms-merchant
+    ```
+
+4. The API will be available at `http://localhost:3000`.
+
+---
+
+## Deployment
+
+This Lambda function can be deployed using Docker and AWS services. To deploy:
+
+1. Build the Docker image:
+
+    ```bash
+    docker build -t ddai-ms-merchant .
+    ```
+
+2. Push the Docker image to an AWS ECR repository:
+
+    ```bash
+    docker tag ddai-ms-merchant:latest 123456789012.dkr.ecr.region.amazonaws.com/ddai-ms-merchant:latest
+    docker push 123456789012.dkr.ecr.region.amazonaws.com/ddai-ms-merchant:latest
+    ```
+
+3. Deploy the Lambda function using AWS CLI or CloudFormation.
+
+---
+
+## Testing
+
+To run unit tests for this service, use the following command:
+
+```bash
+npm test
+```
+
+You can also test the Lambda function locally using Docker:
+
+```bash
+docker run -p 3000:3000 ddai-ms-merchant
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Contact
+
+For more information about dedoAI or to get in touch with the team:
+
+- **Website**: [dedo.org](https://www.dedo.org)
+- **Email**: support@dedo.org
+
