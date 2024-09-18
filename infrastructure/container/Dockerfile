@@ -6,15 +6,6 @@ FROM public.ecr.aws/eks-distro-build-tooling/nodejs:16.18.1-gcc-al23 as build-im
 # Include global arg in this stage of the build
 ARG APP_DIR
 
-# Install build dependencies
-RUN apt-get update && \
-    apt-get install -y \
-    g++ \
-    make \
-    cmake \
-    unzip \
-    libcurl4-openssl-dev
-
 # Copy function code
 RUN mkdir -p ${APP_DIR}
 COPY app/* ${APP_DIR}/
