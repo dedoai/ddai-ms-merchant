@@ -1,15 +1,14 @@
 # Define custom function directory
-ARG FUNCTION_DIR="/function"
+ARG APP_DIR="/app"
 
-FROM public.ecr.aws/lambda/nodejs:18 as build-image
+FROM public.ecr.aws/eks-distro-build-tooling/nodejs:16.18.1-gcc-al23 as build-image
 
 # Include global arg in this stage of the build
-ARG FUNCTION_DIR
+ARG APP_DIR
 
 # Install build dependencies
-RUN yum update && \
-    yum install -y \
-    tar \
+RUN apt-get update && \
+    apt-get install -y \
     g++ \
     make \
     cmake \
@@ -17,34 +16,28 @@ RUN yum update && \
     libcurl4-openssl-dev
 
 # Copy function code
-RUN mkdir -p ${FUNCTION_DIR}
-COPY app/* ${FUNCTION_DIR}/
+RUN mkdir -p ${APP_DIR}
+COPY app/* ${APP_DIR}/
 
-WORKDIR ${FUNCTION_DIR}
+WORKDIR ${APP_DIR}
 
 # Install Node.js dependencies
 RUN npm install
 
-# Install the runtime interface client
-RUN npm install aws-lambda-ric
-
 # Grab a fresh slim copy of the image to reduce the final size
-FROM public.ecr.aws/lambda/nodejs:18
-
-# Required for Node runtimes which use npm@8.6.0+ because
-# by default npm writes logs under /home/.npm and Lambda fs is read-only
-ENV NPM_CONFIG_CACHE=/tmp/.npm
+FROM public.ecr.aws/eks-distro-build-tooling/eks-distro-minimal-base-nodejs:16.18.1-al23
 
 # Include global arg in this stage of the build
-ARG FUNCTION_DIR
+ARG APP_DIR
 
 # Set working directory to function root directory
-WORKDIR ${FUNCTION_DIR}
+WORKDIR ${APP_DIR}
 
 # Copy in the built dependencies
-COPY --from=build-image ${FUNCTION_DIR} ${FUNCTION_DIR}
+COPY --from=build-image ${APP_DIR} ${APP_DIR}
 
-# Set runtime interface client as default command for the container runtime
-ENTRYPOINT ["/usr/local/bin/npx", "aws-lambda-ric"]
-# Pass the name of the function handler as an argument to the runtime
-CMD ["index.handler"]
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the application
+CMD ["npm", "start"]
