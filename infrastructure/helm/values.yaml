@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: {{ACCOUNTID}}.dkr.ecr.us-east-1.amazonaws.com/ddai-ms-backend
+  repository: {{ACCOUNTID}}.dkr.ecr.us-east-1.amazonaws.com/ddai-ms-merchant
   pullPolicy: IfNotPresent
   tag: {{REL}}
 

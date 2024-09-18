@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ddai-ms-backend.fullname" . }}
+  name: {{ include "ddai-ms-merchant.fullname" . }}
   labels:
-    app: {{ include "ddai-ms-backend.name" . }}
+    app: {{ include "ddai-ms-merchant.name" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "ddai-ms-backend.name" . }}
+      app: {{ include "ddai-ms-merchant.name" . }}
   template:
     metadata:
       labels:
-        app: {{ include "ddai-ms-backend.name" . }}
+        app: {{ include "ddai-ms-merchant.name" . }}
     spec:
       containers:
         - name: {{ .Chart.Name }}

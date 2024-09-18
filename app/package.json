@@ -1,21 +1,25 @@
 {
-  "name": "{{FUNCTION_NAME}}",
+  "name": "dedo-merchant-api",
   "version": "1.0.0",
-  "description": "Welcome to the TicketSms sample lambda application",
-  "main": "index.js",
-  "directories": {
-    "test": "tests"
-  },
-  "dependencies": {
-    "crypto": "^1.0.1",
-    "php-unserialize": "^0.0.1",
-    "node-fetch": "^2.6.12",
-    "redis": "^4.6.7"
-  },
-  "devDependencies": {},
+  "description": "DEDO order generator",
+  "main": "src/index.js",
   "scripts": {
+    "start": "node ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "TicketSms Dream Team",
-  "license": "ISC"
+  "keywords": [
+    "dedoai"
+  ],
+  "author": "roccomuso",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "ethers": "^6.8.1",
+    "mongodb": "^3.6.7",
+    "morgan": "^1.10.0",
+    "ms": "^2.1.3",
+    "node-fetch": "2.6.6"
+  }
 }
