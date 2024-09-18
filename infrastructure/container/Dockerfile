@@ -26,6 +26,8 @@ WORKDIR ${APP_DIR}
 
 # Copy in the built dependencies
 COPY --from=build-image ${APP_DIR} ${APP_DIR}
+COPY --from=build-image /usr/local/bin/npm /usr/local/bin/
+COPY --from=build-image /usr/local/bin/node /usr/local/bin/
 
 # Expose the port the app runs on
 EXPOSE 3000
