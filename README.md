@@ -83,10 +83,10 @@ To run or contribute to this project, you will need:
 
     ```bash
     docker build -t ddai-ms-merchant .
-    docker run -p 3000:3000 ddai-ms-merchant
+    docker run -p 8080:8080 ddai-ms-merchant
     ```
 
-4. The API will be available at `http://localhost:3000`.
+4. The API will be available at `http://localhost:8080`.
 
 ---
 
@@ -122,7 +122,7 @@ npm test
 You can also test the Lambda function locally using Docker:
 
 ```bash
-docker run -p 3000:3000 ddai-ms-merchant
+docker run -p 8080:8080 ddai-ms-merchant
 ```
 
 ---
